@@ -1,4 +1,4 @@
-#!/usr/bin/python3
+#!/usr/bin/python
 # Filename: maxSonarTTY.py
 # Publishes an integer value representing distance to target in millimeters
 
@@ -45,7 +45,7 @@ def get_measurement(portName):
 def publish_measurement(portName):
     pub = rospy.Publisher('ultrasound_distance', Int8, queue_size=10)
     rospy.init_node('ultrasound_node')
-    rate = rospy.Rate(1) # 10hz
+    rate = rospy.Rate(10) # 10hz
 
     while not rospy.is_shutdown():
         measurement = get_measurement(portName)

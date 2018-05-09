@@ -1,18 +1,17 @@
 #!/usr/bin/python3
 # Filename: maxSonarTTY.py
-
-# Reads serial data from Maxbotix ultrasonic rangefinders
-# Gracefully handles most common serial data glitches
-# Use as an importable module with "import MaxSonarTTY"
-# Returns an integer value representing distance to target in millimeters
+# Publishes an integer value representing distance to target in millimeters
 
 from time import time
 from serial import Serial
+import rospy
+from std_msgs.msg import Int8
 
 serialDevice = "/dev/ttyAMA0" # default for RaspberryPi
 maxwait = 5 # seconds to try for a good reading before quitting
 
-def measure(portName):
+
+def get_measurement(portName):
     ser = Serial(portName, 9600, 8, 'N', 1, timeout=1)
     timeStart = time()
     valueCount = 0
@@ -43,6 +42,18 @@ def measure(portName):
     ser.close()
     raise RuntimeError("Expected serial data not received")
 
+def publish_measurement(portName):
+    pub = rospy.Publisher('ultrasound_distance', Int8, queue_size=10)
+    rospy.init_node('ultrasound_node')
+    rate = rospy.Rate(1) # 10hz
+
+    while not rospy.is_shutdown():
+        measurement = get_measurement(portName)
+
+        rospy.loginfo(measurement)
+        pub.publish(measurement)
+        rate.sleep()
+
 if __name__ == '__main__':
-    measurement = measure(serialDevice)
-    print("distance =",measurement)
+    publish_measurement(serialDevice)
+    # print("distance =",measurement)

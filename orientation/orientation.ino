@@ -12,20 +12,22 @@ geometry_msgs::Vector3 orientation;
 geometry_msgs::Vector3 linearAccel;
 geometry_msgs::Vector3 angularAccel;
 
-ros::Publisher orientation_topic("orientation_topic", &orientation);
 ros::Publisher linearAccel_topic("linearAccel_topic", &linearAccel);
 ros::Publisher angularAccel_topic("angularAccel_topic", &angularAccel);
+ros::Publisher orientation_topic("orientation_topic", &orientation);
 
 Madgwick filter;
 unsigned long microsPerReading, microsPrevious;
 float accelScale, gyroScale;
 
 void setup() {
-  
-  Serial.begin(9600);
+
+  Serial.begin(115200);
 
   nh.initNode();
   nh.advertise(orientation_topic);
+  nh.advertise(linearAccel_topic);
+  nh.advertise(angularAccel_topic);
 
   // start the IMU and filter
   CurieIMU.begin();
@@ -73,21 +75,21 @@ void loop() {
     pitch = filter.getPitch();
     heading = filter.getYaw();
 
-//    linearAccel.x = ax;
-//    linearAccel.y = ay;
-//    linearAccel.z = az;
-//    angularAccel.x = gx;
-//    angularAccel.y = gy;
-//    angularAccel.z = gz;
-    
+    linearAccel.x = ax;
+    linearAccel.y = ay;
+    linearAccel.z = az;
+    angularAccel.x = gx;
+    angularAccel.y = gy;
+    angularAccel.z = gz;
+
     orientation.x = roll;
     orientation.y = pitch;
     orientation.z = heading;
 
-//    linearAccel_topic.publish( &linearAccel );
-//    angularAccel_topic.publish( &angularAccel );
+    linearAccel_topic.publish( &linearAccel );
+    angularAccel_topic.publish( &angularAccel );
     orientation_topic.publish( &orientation );
-    
+
     nh.spinOnce();
 
     // increment previous time, so we keep proper pace
@@ -99,7 +101,7 @@ float convertRawAcceleration(int aRaw) {
   // since we are using 2G range
   // -2g maps to a raw value of -32768
   // +2g maps to a raw value of 32767
-  
+
   float a = (aRaw * 2.0) / 32768.0;
   return a;
 }
@@ -108,7 +110,7 @@ float convertRawGyro(int gRaw) {
   // since we are using 250 degrees/seconds range
   // -250 maps to a raw value of -32768
   // +250 maps to a raw value of 32767
-  
+
   float g = (gRaw * 250.0) / 32768.0;
   return g;
 }

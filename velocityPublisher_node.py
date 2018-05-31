@@ -6,15 +6,15 @@ from geometry_msgs.msg import Point
 
 
 def VelocityPublisher_talker():
-    pub = rospy.Publisher('setAngularVelocity', Point, queue_size=10)
+    pub = rospy.Publisher('setStepMotorVelocity_topic', Point, queue_size=10)
     # rospy.init_node('setpoint_node', anonymous=True)
-    rospy.init_node('Velocity_Publisher')
+    rospy.init_node('MotorVelocity_Publisher')
     rate = rospy.Rate(1) # 10hz
     velocity=100.00
     while not rospy.is_shutdown():
-        velocity -= 0.10
-        rospy.loginfo(velocity)
-        pub.publish(velocity)
+        velocity -= 1.0
+        rospy.loginfo([velocity,velocity,velocity])
+        pub.publish(velocity,velocity,velocity)
         rate.sleep()
 
 if __name__ == '__main__':
